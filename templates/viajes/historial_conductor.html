@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block titulo %}Mis ganancias - TRAIBER{% endblock %}
+{% block contenido %}
+<h1 class="h4 fw-bold mb-3">Historial de viajes y ganancias</h1>
+<div class="card card-traiber p-3">
+    <table class="table align-middle mb-0">
+        <thead><tr><th>Fecha</th><th>Origen</th><th>Destino</th><th>Tarifa cobrada</th><th>Comisión TRAIBER</th><th>Neto recibido</th><th>Estado</th></tr></thead>
+        <tbody>
+        {% for viaje in viajes %}
+            <tr>
+                <td>{{ viaje.creado|date:"d/m/Y H:i" }}</td>
+                <td>{{ viaje.origen_direccion|truncatechars:25 }}</td>
+                <td>{{ viaje.destino_direccion|truncatechars:25 }}</td>
+                <td>{{ SIMBOLO_MONEDA }} {{ viaje.tarifa_final|default:"-" }}</td>
+                <td>{{ SIMBOLO_MONEDA }} {{ viaje.monto_comision_plataforma|floatformat:2 }}</td>
+                <td>{{ SIMBOLO_MONEDA }} {{ viaje.monto_neto_conductor|floatformat:2 }}</td>
+                <td>{{ viaje.get_estado_display }}</td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="7" class="text-muted text-center py-4">Aún no tienes viajes completados.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block titulo %}Mi perfil - TRAIBER{% endblock %}
+{% block contenido %}
+<div class="row justify-content-center g-4">
+    <div class="col-lg-6">
+        <div class="card card-traiber p-4">
+            <h1 class="h4 fw-bold mb-3">Mi perfil</h1>
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                {% include "partials/campos_formulario.html" %}
+                <button type="submit" class="btn btn-traiber w-100 mt-2">Guardar cambios</button>
+            </form>
+            <a href="{% url 'usuarios:cambiar_clave' %}" class="d-block text-center mt-3">Cambiar contraseña</a>
+            {% if user.es_conductor %}
+            <a href="{% url 'usuarios:registrar_vehiculo' %}" class="d-block text-center mt-1">Editar datos de mi vehículo</a>
+            {% endif %}
+        </div>
+    </div>
+    <div class="col-lg-6">
+        <div class="card card-traiber p-4">
+            <h2 class="h5 fw-bold mb-3">Contactos de confianza</h2>
+            <p class="text-muted small">Se les puede compartir el enlace de seguimiento en vivo de tu viaje.</p>
+            <ul class="list-group mb-3">
+                {% for contacto in contactos %}
+                <li class="list-group-item d-flex justify-content-between align-items-center">
+                    <span>{{ contacto.nombre }} - {{ contacto.celular }}</span>
+                    <a href="{% url 'usuarios:eliminar_contacto_confianza' contacto.id %}" class="btn btn-sm btn-outline-danger">Eliminar</a>
+                </li>
+                {% empty %}
+                <li class="list-group-item text-muted">Aún no agregas contactos de confianza.</li>
+                {% endfor %}
+            </ul>
+            <form method="post" action="{% url 'usuarios:agregar_contacto_confianza' %}">
+                {% csrf_token %}
+                {% include "partials/campos_formulario.html" with form=contacto_form %}
+                <button type="submit" class="btn btn-outline-traiber w-100">Agregar contacto</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,8 @@
+{% extends "base.html" %}
+{% block titulo %}Contraseña actualizada - TRAIBER{% endblock %}
+{% block contenido %}
+<div class="text-center">
+    <h1 class="h4 fw-bold">¡Tu contraseña fue actualizada!</h1>
+    <a href="{% url 'core:redirigir_panel' %}" class="btn btn-traiber mt-3">Volver a mi panel</a>
+</div>
+{% endblock %}

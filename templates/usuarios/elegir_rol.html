@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% block titulo %}Crear cuenta - TRAIBER{% endblock %}
+{% block contenido %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <h1 class="h3 fw-bold text-center mb-4">¿Cómo quieres usar TRAIBER?</h1>
+        <div class="row g-4">
+            <div class="col-md-6">
+                <a href="{% url 'usuarios:registro_pasajero' %}" class="text-decoration-none">
+                    <div class="card card-traiber p-4 text-center h-100">
+                        <div style="font-size: 3rem;">🧑‍💼</div>
+                        <h2 class="h5 fw-bold mt-2">Soy pasajero</h2>
+                        <p class="text-muted mb-0">Quiero pedir viajes por la ciudad.</p>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-6">
+                <a href="{% url 'usuarios:registro_conductor' %}" class="text-decoration-none">
+                    <div class="card card-traiber p-4 text-center h-100">
+                        <div style="font-size: 3rem;">🚗</div>
+                        <h2 class="h5 fw-bold mt-2">Soy conductor</h2>
+                        <p class="text-muted mb-0">Quiero generar ingresos llevando pasajeros.</p>
+                    </div>
+                </a>
+            </div>
+        </div>
+        <p class="text-center mt-4">
+            ¿Ya tienes cuenta? <a href="{% url 'usuarios:iniciar_sesion' %}">Inicia sesión aquí</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

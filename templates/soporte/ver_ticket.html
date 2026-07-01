@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+{% block titulo %}Ticket #{{ ticket.id }} - TRAIBER{% endblock %}
+{% block contenido %}
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <div class="card card-traiber p-4 mb-3">
+            <div class="d-flex justify-content-between align-items-start">
+                <div>
+                    <h1 class="h5 fw-bold mb-1">{{ ticket.asunto }}</h1>
+                    <p class="text-muted mb-0">{{ ticket.get_categoria_display }} &middot; {{ ticket.get_estado_display }}</p>
+                </div>
+                {% if user.es_admin_traiber %}
+                <div class="btn-group">
+                    <a class="btn btn-sm btn-outline-success" href="{% url 'soporte:cambiar_estado_ticket' ticket.id 'resuelto' %}">Resuelto</a>
+                    <a class="btn btn-sm btn-outline-secondary" href="{% url 'soporte:cambiar_estado_ticket' ticket.id 'cerrado' %}">Cerrar</a>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card card-traiber p-4 mb-3" style="max-height: 400px; overflow-y: auto;">
+            {% for mensaje in mensajes %}
+            <div class="mb-3 {% if mensaje.es_staff %}text-end{% endif %}">
+                <div class="d-inline-block p-2 rounded-3 {% if mensaje.es_staff %}bg-dark text-white{% else %}bg-light{% endif %}" style="max-width: 80%;">
+                    <small class="d-block fw-bold">{{ mensaje.autor.get_full_name|default:mensaje.autor.username }}</small>
+                    {{ mensaje.texto }}
+                </div>
+            </div>
+            {% empty %}
+            <p class="text-muted mb-0">Aún no hay mensajes en este ticket.</p>
+            {% endfor %}
+        </div>
+
+        <form method="post" class="d-flex gap-2">
+            {% csrf_token %}
+            {{ form.texto }}
+            <button type="submit" class="btn btn-traiber">Enviar</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

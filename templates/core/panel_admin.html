@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% block titulo %}Panel de administración - TRAIBER{% endblock %}
+{% block contenido %}
+<h1 class="h4 fw-bold mb-4">Panel de administración TRAIBER</h1>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-3">
+        <div class="card card-traiber p-3 text-center">
+            <div class="h3 fw-bold mb-0">{{ total_pasajeros }}</div>
+            <div class="text-muted">Pasajeros</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-traiber p-3 text-center">
+            <div class="h3 fw-bold mb-0">{{ total_conductores }}</div>
+            <div class="text-muted">Conductores</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-traiber p-3 text-center">
+            <div class="h3 fw-bold mb-0">{{ viajes_activos|length }}</div>
+            <div class="text-muted">Viajes activos</div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card card-traiber p-3 text-center">
+            <div class="h3 fw-bold mb-0">{{ tickets_abiertos|length }}</div>
+            <div class="text-muted">Tickets abiertos</div>
+        </div>
+    </div>
+</div>
+
+<div class="card card-traiber p-4 mb-4">
+    <h2 class="h5 fw-bold mb-3">Conductores pendientes de aprobación</h2>
+    <table class="table align-middle mb-0">
+        <thead><tr><th>Conductor</th><th>Licencia</th><th>Vencimiento</th><th></th></tr></thead>
+        <tbody>
+        {% for perfil in conductores_pendientes %}
+            <tr>
+                <td>{{ perfil.usuario.get_full_name|default:perfil.usuario.username }}</td>
+                <td>{{ perfil.licencia_numero }}</td>
+                <td>{{ perfil.licencia_vencimiento|default:"-" }}</td>
+                <td class="d-flex gap-2">
+                    <a href="{% url 'core:admin_aprobar_conductor' perfil.id %}" class="btn btn-sm btn-traiber">Aprobar</a>
+                    <a href="{% url 'core:admin_rechazar_conductor' perfil.id %}" class="btn btn-sm btn-outline-danger">Rechazar</a>
+                </td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="4" class="text-muted text-center py-3">No hay conductores pendientes.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="card card-traiber p-4 mb-4">
+    <h2 class="h5 fw-bold mb-3">Vehículos pendientes de aprobación</h2>
+    <table class="table align-middle mb-0">
+        <thead><tr><th>Conductor</th><th>Placa</th><th>Vehículo</th><th>SOAT vigente</th><th></th></tr></thead>
+        <tbody>
+        {% for vehiculo in vehiculos_pendientes %}
+            <tr>
+                <td>{{ vehiculo.conductor.get_full_name|default:vehiculo.conductor.username }}</td>
+                <td>{{ vehiculo.placa }}</td>
+                <td>{{ vehiculo.marca }} {{ vehiculo.modelo }} - {{ vehiculo.color }}</td>
+                <td>{% if vehiculo.soat_vigente %}<span class="text-success">Sí</span>{% else %}<span class="text-danger">No</span>{% endif %}</td>
+                <td><a href="{% url 'core:admin_aprobar_vehiculo' vehiculo.id %}" class="btn btn-sm btn-traiber">Aprobar</a></td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="5" class="text-muted text-center py-3">No hay vehículos pendientes.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="card card-traiber p-4 mb-4">
+    <h2 class="h5 fw-bold mb-3">Viajes activos en la ciudad</h2>
+    <div id="mapa-admin" style="height: 350px; border-radius: 16px;"></div>
+    <table class="table align-middle mt-3 mb-0">
+        <thead><tr><th>#</th><th>Pasajero</th><th>Conductor</th><th>Estado</th><th></th></tr></thead>
+        <tbody>
+        {% for viaje in viajes_activos %}
+            <tr>
+                <td>{{ viaje.id }}</td>
+                <td>{{ viaje.pasajero }}</td>
+                <td>{{ viaje.conductor|default:"Sin asignar" }}</td>
+                <td>{{ viaje.get_estado_display }}</td>
+                <td><a href="{% url 'viajes:ver_viaje' viaje.id %}" class="btn btn-sm btn-outline-traiber">Ver</a></td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="5" class="text-muted text-center py-3">No hay viajes activos en este momento.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="card card-traiber p-4 mb-4">
+    <h2 class="h5 fw-bold mb-3">Tickets de soporte abiertos</h2>
+    <table class="table align-middle mb-0">
+        <thead><tr><th>Asunto</th><th>Usuario</th><th>Categoría</th><th></th></tr></thead>
+        <tbody>
+        {% for ticket in tickets_abiertos %}
+            <tr>
+                <td>{{ ticket.asunto|truncatechars:40 }}</td>
+                <td>{{ ticket.usuario }}</td>
+                <td>{{ ticket.get_categoria_display }}</td>
+                <td><a href="{% url 'soporte:ver_ticket' ticket.id %}" class="btn btn-sm btn-outline-traiber">Atender</a></td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="4" class="text-muted text-center py-3">No hay tickets abiertos.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="card card-traiber p-4">
+    <h2 class="h5 fw-bold mb-3">Usuarios bloqueados</h2>
+    <table class="table align-middle mb-0">
+        <thead><tr><th>Usuario</th><th>Motivo</th><th></th></tr></thead>
+        <tbody>
+        {% for usuario in usuarios_bloqueados %}
+            <tr>
+                <td>{{ usuario }}</td>
+                <td>{{ usuario.motivo_bloqueo|default:"-" }}</td>
+                <td><a href="{% url 'core:admin_bloquear_usuario' usuario.id %}" class="btn btn-sm btn-outline-success">Desbloquear</a></td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="3" class="text-muted text-center py-3">No hay usuarios bloqueados.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    <p class="text-muted small mt-2 mb-0">Para bloquear una cuenta problemática, usa el <a href="/django-admin/usuarios/usuario/" target="_blank">admin de Django</a>.</p>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% load l10n %}{% localize off %}
+<script>
+    const mapaAdmin = L.map('mapa-admin').setView([-12.0464, -77.0428], 12);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' }).addTo(mapaAdmin);
+    const viajesActivos = [
+        {% for viaje in viajes_activos %}
+        { lat: {{ viaje.origen_lat }}, lng: {{ viaje.origen_lng }}, id: {{ viaje.id }} },
+        {% endfor %}
+    ];
+    viajesActivos.forEach((v) => {
+        L.marker([v.lat, v.lng]).addTo(mapaAdmin).bindPopup(`Viaje #${v.id}`);
+    });
+</script>
+{% endlocalize %}
+{% endblock %}

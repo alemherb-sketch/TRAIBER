@@ -1,0 +1,92 @@
+{% extends "base.html" %}
+{% load static %}
+{% block titulo %}Panel de conductor - TRAIBER{% endblock %}
+{% block contenido %}
+<div class="row g-4">
+    <div class="col-lg-4">
+        <div class="card card-traiber p-4 mb-3">
+            <h1 class="h5 fw-bold mb-3">Mi estado</h1>
+            {% if not perfil.aprobado %}
+            <div class="alert alert-warning">Tu cuenta está <strong>{{ perfil.get_estado_aprobacion_display }}</strong>. Un administrador debe aprobarte antes de recibir viajes.</div>
+            {% elif not vehiculo %}
+            <div class="alert alert-warning">
+                Aún no registras tu vehículo.
+                <a href="{% url 'usuarios:registrar_vehiculo' %}">Regístralo aquí</a>.
+            </div>
+            {% elif not vehiculo.aprobado %}
+            <div class="alert alert-warning">Tu vehículo está pendiente de aprobación por el administrador.</div>
+            {% else %}
+            <form method="post" action="{% url 'viajes:actualizar_disponibilidad' %}">
+                {% csrf_token %}
+                <button type="submit" class="btn w-100 {% if perfil.disponible %}btn-danger{% else %}btn-traiber{% endif %}">
+                    {% if perfil.disponible %}🔴 Ponerme fuera de línea{% else %}🟢 Ponerme disponible{% endif %}
+                </button>
+            </form>
+            {% endif %}
+
+            <hr>
+            <p class="mb-1"><strong>Calificación:</strong> ⭐ {{ perfil.calificacion_promedio }}</p>
+            <p class="mb-1"><strong>Viajes completados:</strong> {{ total_viajes }}</p>
+            <p class="mb-0"><strong>Ganancias totales:</strong> {{ SIMBOLO_MONEDA }} {{ total_ganado|floatformat:2 }}</p>
+        </div>
+    </div>
+    <div class="col-lg-8">
+        <div class="card card-traiber p-4">
+            <h2 class="h5 fw-bold mb-3">Solicitudes disponibles</h2>
+            <div id="lista-solicitudes">
+            {% for s in solicitudes %}
+                <div class="card tarjeta-solicitud mb-2 p-3">
+                    <p class="mb-1"><strong>{{ s.origen_direccion }}</strong> → {{ s.destino_direccion }}</p>
+                    <p class="mb-2 text-muted">{{ s.distancia_km }} km &middot; {{ SIMBOLO_MONEDA }} {{ s.tarifa_sugerida }}</p>
+                    {% if s.modo_tarifa == 'oferta' %}
+                    <form method="post" action="{% url 'viajes:ofertar_viaje' s.id %}" class="d-flex gap-2">
+                        {% csrf_token %}
+                        <input type="number" step="0.5" min="1" name="monto_ofertado" class="form-control form-control-sm" placeholder="Tu oferta S/" required>
+                        <button type="submit" class="btn btn-sm btn-traiber">Ofertar</button>
+                    </form>
+                    {% else %}
+                    <form method="post" action="{% url 'viajes:aceptar_viaje' s.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-traiber">Aceptar viaje</button>
+                    </form>
+                    {% endif %}
+                </div>
+            {% empty %}
+                <p class="text-muted" id="sin-solicitudes">
+                    {% if perfil.disponible %}Esperando nuevas solicitudes de viaje...{% else %}Ponte disponible para recibir solicitudes.{% endif %}
+                </p>
+            {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% if perfil.disponible %}
+<script>
+    const protocolo = window.location.protocol === 'https:' ? 'wss' : 'ws';
+    const socket = new WebSocket(`${protocolo}://${window.location.host}/ws/conductor/notificaciones/`);
+    socket.onmessage = (evento) => {
+        const datos = JSON.parse(evento.data);
+        if (['nueva_solicitud', 'solicitud_tomada'].includes(datos.tipo)) {
+            window.location.reload();
+        }
+    };
+
+    if (navigator.geolocation) {
+        navigator.geolocation.watchPosition((pos) => {
+            const csrftoken = '{{ csrf_token }}';
+            const datos = new FormData();
+            datos.append('lat', pos.coords.latitude);
+            datos.append('lng', pos.coords.longitude);
+            fetch("{% url 'viajes:actualizar_ubicacion_conductor' %}", {
+                method: 'POST',
+                headers: { 'X-CSRFToken': csrftoken },
+                body: datos,
+            });
+        }, null, { enableHighAccuracy: true, maximumAge: 10000 });
+    }
+</script>
+{% endif %}
+{% endblock %}

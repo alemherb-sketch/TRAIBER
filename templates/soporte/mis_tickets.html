@@ -1,0 +1,27 @@
+{% extends "base.html" %}
+{% block titulo %}Soporte - TRAIBER{% endblock %}
+{% block contenido %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1 class="h4 fw-bold mb-0">{% if user.es_admin_traiber %}Todos los tickets{% else %}Mis tickets de soporte{% endif %}</h1>
+    <a href="{% url 'soporte:crear_ticket' %}" class="btn btn-traiber">+ Nuevo ticket</a>
+</div>
+<div class="card card-traiber p-3">
+    <table class="table align-middle mb-0">
+        <thead><tr><th>Asunto</th><th>Categoría</th>{% if user.es_admin_traiber %}<th>Usuario</th>{% endif %}<th>Estado</th><th>Actualizado</th><th></th></tr></thead>
+        <tbody>
+        {% for ticket in tickets %}
+            <tr>
+                <td>{{ ticket.asunto|truncatechars:40 }}</td>
+                <td>{{ ticket.get_categoria_display }}</td>
+                {% if user.es_admin_traiber %}<td>{{ ticket.usuario }}</td>{% endif %}
+                <td>{{ ticket.get_estado_display }}</td>
+                <td>{{ ticket.actualizado|date:"d/m/Y H:i" }}</td>
+                <td><a href="{% url 'soporte:ver_ticket' ticket.id %}" class="btn btn-sm btn-outline-traiber">Ver</a></td>
+            </tr>
+        {% empty %}
+            <tr><td colspan="6" class="text-muted text-center py-4">No hay tickets registrados.</td></tr>
+        {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

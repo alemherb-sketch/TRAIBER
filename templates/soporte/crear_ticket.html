@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block titulo %}Nuevo ticket - TRAIBER{% endblock %}
+{% block contenido %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card card-traiber p-4">
+            <h1 class="h4 fw-bold mb-3">Nuevo ticket de soporte</h1>
+            <p class="text-muted">Dudas, objetos perdidos, reembolsos o cualquier problema con un viaje.</p>
+            <form method="post">
+                {% csrf_token %}
+                {% include "partials/campos_formulario.html" %}
+                <button type="submit" class="btn btn-traiber w-100 mt-2">Enviar ticket</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

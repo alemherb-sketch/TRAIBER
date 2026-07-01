@@ -1,0 +1,17 @@
+{% extends "base.html" %}
+{% block titulo %}Datos del vehículo - TRAIBER{% endblock %}
+{% block contenido %}
+<div class="row justify-content-center">
+    <div class="col-lg-7">
+        <div class="card card-traiber p-4">
+            <h1 class="h3 fw-bold mb-1">Datos de tu vehículo</h1>
+            <p class="text-muted">Un administrador revisará tu SOAT y licencia antes de aprobarte.</p>
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                {% include "partials/campos_formulario.html" %}
+                <button type="submit" class="btn btn-traiber w-100 mt-2">Guardar vehículo</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}

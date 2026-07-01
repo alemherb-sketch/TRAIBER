@@ -1,0 +1,253 @@
+{% extends "base.html" %}
+{% load static l10n %}
+{% block titulo %}Viaje #{{ viaje.id }} - TRAIBER{% endblock %}
+{% block contenido %}
+<!-- MARCADOR_TEST_999 -->
+<div class="row g-4">
+    <div class="col-lg-7">
+        <div id="mapa-tracking"></div>
+    </div>
+    <div class="col-lg-5">
+        <div class="card card-traiber p-4 mb-3">
+            <div class="d-flex justify-content-between align-items-start mb-2">
+                <h1 class="h5 fw-bold mb-0">Viaje #{{ viaje.id }}</h1>
+                <span class="badge badge-estado
+                    {% if viaje.estado == 'buscando' %}bg-warning text-dark
+                    {% elif viaje.estado == 'finalizado' %}bg-success
+                    {% elif viaje.estado == 'cancelado' %}bg-secondary
+                    {% else %}bg-primary{% endif %}" id="badge-estado">
+                    {{ viaje.get_estado_display }}
+                </span>
+            </div>
+            <p class="mb-1"><strong>Desde:</strong> {{ viaje.origen_direccion }}</p>
+            <p class="mb-1"><strong>Hasta:</strong> {{ viaje.destino_direccion }}</p>
+            <p class="mb-1"><strong>Distancia:</strong> {{ viaje.distancia_km }} km &middot; {{ viaje.tiempo_estimado_min }} min</p>
+            <p class="mb-1">
+                <strong>Tarifa:</strong>
+                {{ SIMBOLO_MONEDA }} {{ viaje.tarifa_final|default:viaje.tarifa_sugerida }}
+                {% if viaje.modo_tarifa == 'oferta' %}<span class="text-muted">(modo oferta)</span>{% endif %}
+            </p>
+            <p class="mb-1"><strong>Método de pago:</strong> {{ viaje.get_metodo_pago_display }}</p>
+
+            {% if viaje.conductor %}
+            <hr>
+            <p class="mb-1"><strong>Conductor:</strong> {{ viaje.conductor.get_full_name|default:viaje.conductor.username }}</p>
+            {% if viaje.placa_vehiculo %}
+            <p class="mb-1"><strong>Vehículo:</strong> {{ viaje.modelo_vehiculo }} - {{ viaje.color_vehiculo }} - Placa {{ viaje.placa_vehiculo }}</p>
+            {% endif %}
+            {% endif %}
+
+            <div id="mensaje-estado" class="alert alert-info mt-3 {% if not viaje.activo %}d-none{% endif %}">
+                {% if viaje.estado == 'buscando' %}Buscando un conductor disponible...{% endif %}
+            </div>
+
+            <div class="d-flex flex-wrap gap-2 mt-2">
+                {% if viaje.activo %}
+                <form method="post" action="{% url 'viajes:cancelar_viaje' viaje.id %}" onsubmit="return confirm('¿Seguro que deseas cancelar el viaje?');">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-outline-secondary btn-sm">Cancelar viaje</button>
+                </form>
+
+                {% if es_conductor_de_este_viaje and viaje.estado != 'en_curso' %}
+                <form method="post" action="{% url 'viajes:iniciar_viaje' viaje.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-traiber btn-sm">Iniciar viaje</button>
+                </form>
+                {% endif %}
+
+                {% if es_conductor_de_este_viaje %}
+                {% localize off %}
+                {% if viaje.estado == 'en_curso' %}
+                <a class="btn btn-outline-traiber btn-sm" target="_blank" rel="noopener"
+                   href="https://www.google.com/maps/dir/?api=1&destination={{ viaje.destino_lat }},{{ viaje.destino_lng }}&travelmode=driving">🗺️ Navegar en Google Maps</a>
+                <a class="btn btn-outline-traiber btn-sm" target="_blank" rel="noopener"
+                   href="https://waze.com/ul?ll={{ viaje.destino_lat }},{{ viaje.destino_lng }}&navigate=yes">🚦 Navegar en Waze</a>
+                {% else %}
+                <a class="btn btn-outline-traiber btn-sm" target="_blank" rel="noopener"
+                   href="https://www.google.com/maps/dir/?api=1&destination={{ viaje.origen_lat }},{{ viaje.origen_lng }}&travelmode=driving">🗺️ Navegar al recojo (Google Maps)</a>
+                <a class="btn btn-outline-traiber btn-sm" target="_blank" rel="noopener"
+                   href="https://waze.com/ul?ll={{ viaje.origen_lat }},{{ viaje.origen_lng }}&navigate=yes">🚦 Navegar al recojo (Waze)</a>
+                {% endif %}
+                {% endlocalize %}
+                {% endif %}
+
+                {% if es_conductor_de_este_viaje and viaje.estado == 'en_curso' %}
+                <form method="post" action="{% url 'viajes:finalizar_viaje' viaje.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-traiber btn-sm">Finalizar viaje</button>
+                </form>
+                {% endif %}
+
+                <button type="button" class="btn boton-emergencia btn-sm" id="btn-emergencia">🆘 Emergencia</button>
+
+                {% if es_pasajero_de_este_viaje %}
+                    {% if enlace_compartir %}
+                    <button type="button" class="btn btn-outline-traiber btn-sm" onclick="copiarEnlace()">🔗 Copiar enlace para compartir</button>
+                    <input type="hidden" id="enlace-compartir-valor" value="{{ request.scheme }}://{{ request.get_host }}{% url 'viajes:seguimiento_publico' enlace_compartir.token %}">
+                    {% else %}
+                    <form method="post" action="{% url 'viajes:compartir_viaje' viaje.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-outline-traiber btn-sm">🔗 Compartir viaje</button>
+                    </form>
+                    {% endif %}
+                {% endif %}
+                {% endif %}
+            </div>
+        </div>
+
+        {% if viaje.modo_tarifa == 'oferta' and es_pasajero_de_este_viaje and viaje.estado == 'buscando' %}
+        <div class="card card-traiber p-4 mb-3">
+            <h2 class="h6 fw-bold mb-3">Ofertas de conductores</h2>
+            <div id="lista-ofertas">
+            {% for oferta in ofertas %}
+                <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+                    <div>
+                        <strong>{{ oferta.conductor.get_full_name|default:oferta.conductor.username }}</strong><br>
+                        <span class="text-muted">{{ SIMBOLO_MONEDA }} {{ oferta.monto_ofertado }}</span>
+                    </div>
+                    <form method="post" action="{% url 'viajes:aceptar_oferta' oferta.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-sm btn-traiber">Aceptar</button>
+                    </form>
+                </div>
+            {% empty %}
+                <p class="text-muted mb-0">Aún no hay ofertas. Espera un momento...</p>
+            {% endfor %}
+            </div>
+        </div>
+        {% endif %}
+
+        {% if es_conductor_de_este_viaje and viaje.modo_tarifa == 'oferta' and not viaje.conductor %}
+        <div class="card card-traiber p-4 mb-3">
+            <h2 class="h6 fw-bold">Proponer tarifa</h2>
+            <form method="post" action="{% url 'viajes:ofertar_viaje' viaje.id %}" class="d-flex gap-2">
+                {% csrf_token %}
+                <input type="number" step="0.5" min="1" name="monto_ofertado" class="form-control" required>
+                <button type="submit" class="btn btn-traiber">Ofertar</button>
+            </form>
+        </div>
+        {% endif %}
+
+        {% if viaje.estado == 'finalizado' and not ya_califico %}
+        <div class="card card-traiber p-4">
+            <h2 class="h6 fw-bold mb-3">Califica tu experiencia</h2>
+            <form method="post" action="{% url 'viajes:calificar_viaje' viaje.id %}">
+                {% csrf_token %}
+                <div class="mb-2" id="estrellas">
+                    {% for i in "12345" %}
+                    <span class="estrella" data-valor="{{ i }}">☆</span>
+                    {% endfor %}
+                </div>
+                <input type="hidden" name="puntuacion" id="input-puntuacion" value="5">
+                <textarea name="comentario" class="form-control mb-2" placeholder="Comentario (opcional)"></textarea>
+                <button type="submit" class="btn btn-traiber w-100">Enviar calificación</button>
+            </form>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="modal fade" id="modalEmergencia" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title">🆘 Emergencia activada</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Se notificó a tus contactos y al viaje. Si es urgente, llama a la policía:</p>
+                <a href="tel:{{ numero_emergencia }}" class="btn btn-danger w-100 mb-2">Llamar al {{ numero_emergencia }} (Policía Perú)</a>
+                <p class="text-muted small mb-0">Comparte tu enlace de seguimiento con un contacto de confianza para que vea tu ubicación en vivo.</p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% load l10n %}{% localize off %}
+<script src="{% static 'js/mapa.js' %}"></script>
+<script>
+    const viajeId = {{ viaje.id }};
+    const esConductor = {{ es_conductor_de_este_viaje|yesno:"true,false" }};
+    const mapa = L.map('mapa-tracking').setView([{{ viaje.origen_lat }}, {{ viaje.origen_lng }}], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' }).addTo(mapa);
+
+    const iconoOrigen = L.divIcon({ html: '<div style="font-size:1.6rem;">🟢</div>', className: '' });
+    const iconoDestino = L.divIcon({ html: '<div style="font-size:1.6rem;">🔴</div>', className: '' });
+    const iconoConductor = L.divIcon({ html: '<div style="font-size:1.8rem;">🚗</div>', className: '' });
+
+    L.marker([{{ viaje.origen_lat }}, {{ viaje.origen_lng }}], { icon: iconoOrigen }).addTo(mapa).bindPopup('Recojo');
+    L.marker([{{ viaje.destino_lat }}, {{ viaje.destino_lng }}], { icon: iconoDestino }).addTo(mapa).bindPopup('Destino');
+    let marcadorConductor = null;
+
+    const protocolo = window.location.protocol === 'https:' ? 'wss' : 'ws';
+    const socket = new WebSocket(`${protocolo}://${window.location.host}/ws/viaje/${viajeId}/`);
+
+    socket.onmessage = (evento) => {
+        const datos = JSON.parse(evento.data);
+        if (datos.tipo === 'ubicacion') {
+            const lat = parseFloat(datos.lat);
+            const lng = parseFloat(datos.lng);
+            if (marcadorConductor) mapa.removeLayer(marcadorConductor);
+            marcadorConductor = L.marker([lat, lng], { icon: iconoConductor }).addTo(mapa).bindPopup('Conductor');
+        } else if (datos.tipo === 'estado') {
+            document.getElementById('badge-estado').textContent = datos.mensaje || datos.estado;
+            const mensajeDiv = document.getElementById('mensaje-estado');
+            mensajeDiv.classList.remove('d-none');
+            mensajeDiv.textContent = datos.mensaje;
+            if (['finalizado', 'cancelado'].includes(datos.estado)) {
+                setTimeout(() => window.location.reload(), 1500);
+            } else {
+                setTimeout(() => window.location.reload(), 800);
+            }
+        } else if (datos.tipo === 'oferta') {
+            window.location.reload();
+        } else if (datos.tipo === 'emergencia') {
+            alert('¡Emergencia activada por ' + datos.usuario + '!');
+        }
+    };
+
+    // El conductor comparte su ubicacion en vivo
+    if (esConductor && navigator.geolocation) {
+        navigator.geolocation.watchPosition((pos) => {
+            const lat = pos.coords.latitude;
+            const lng = pos.coords.longitude;
+            if (socket.readyState === WebSocket.OPEN) {
+                socket.send(JSON.stringify({ tipo: 'ubicacion', lat, lng }));
+            }
+        }, null, { enableHighAccuracy: true, maximumAge: 5000 });
+    }
+
+    document.getElementById('btn-emergencia').addEventListener('click', () => {
+        const csrftoken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+        fetch(`/viajes/${viajeId}/emergencia/`, {
+            method: 'POST',
+            headers: { 'X-CSRFToken': csrftoken },
+        }).then(() => {
+            if (socket.readyState === WebSocket.OPEN) {
+                socket.send(JSON.stringify({ tipo: 'emergencia' }));
+            }
+            new bootstrap.Modal(document.getElementById('modalEmergencia')).show();
+        });
+    });
+
+    function copiarEnlace() {
+        const valor = document.getElementById('enlace-compartir-valor');
+        if (!valor) return;
+        navigator.clipboard.writeText(valor.value);
+        alert('Enlace copiado. Compártelo con tu contacto de confianza.');
+    }
+
+    document.querySelectorAll('#estrellas .estrella').forEach((estrella) => {
+        estrella.addEventListener('click', () => {
+            const valor = parseInt(estrella.dataset.valor, 10);
+            document.getElementById('input-puntuacion').value = valor;
+            document.querySelectorAll('#estrellas .estrella').forEach((e) => {
+                e.textContent = parseInt(e.dataset.valor, 10) <= valor ? '★' : '☆';
+            });
+        });
+    });
+</script>
+{% endlocalize %}
+{% endblock %}

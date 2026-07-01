@@ -1,0 +1,51 @@
+{% extends "base.html" %}
+{% block titulo %}TRAIBER - Muévete por todo el Perú{% endblock %}
+{% block contenido %}
+<div class="hero-traiber rounded-4 px-4 px-md-5 mb-5">
+    <div class="row align-items-center">
+        <div class="col-lg-7">
+            <h1 class="display-5 fw-bold mb-3">Tu viaje, a tu tarifa.</h1>
+            <p class="lead mb-4">
+                TRAIBER conecta pasajeros y conductores en todo el Perú. Pide tu viaje con tarifa automática
+                o propón tu propio precio. Paga con Yape, Plin, tarjeta o efectivo.
+            </p>
+            <div class="d-flex gap-3 flex-wrap">
+                <a href="{% url 'usuarios:registro_pasajero' %}" class="btn btn-traiber btn-lg px-4">Quiero viajar</a>
+                <a href="{% url 'usuarios:registro_conductor' %}" class="btn btn-outline-light btn-lg px-4">Quiero manejar</a>
+            </div>
+        </div>
+        <div class="col-lg-5 d-none d-lg-block text-center">
+            <div style="font-size: 9rem;">🚕</div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-4 mb-5">
+    <div class="col-md-4">
+        <div class="card card-traiber h-100 p-4">
+            <h3 class="h5 fw-bold">📍 Monitoreo en tiempo real</h3>
+            <p class="text-muted mb-0">Ve a tu conductor en el mapa, su ETA, placa, modelo y color del vehículo.</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card card-traiber h-100 p-4">
+            <h3 class="h5 fw-bold">💰 Tú eliges la tarifa</h3>
+            <p class="text-muted mb-0">Tarifa automática o propone tu propio precio, al estilo inDrive. Todo en soles.</p>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card card-traiber h-100 p-4">
+            <h3 class="h5 fw-bold">🆘 Viaja seguro</h3>
+            <p class="text-muted mb-0">Botón de emergencia y comparte tu viaje en vivo con tus contactos de confianza.</p>
+        </div>
+    </div>
+</div>
+
+<div class="card card-traiber p-4 p-md-5 text-center">
+    <h2 class="h4 fw-bold mb-2">¿Quieres generar ingresos manejando?</h2>
+    <p class="text-muted mb-3">Regístrate como conductor, sube tus documentos (licencia y SOAT) y empieza a recibir viajes.</p>
+    <div>
+        <a href="{% url 'usuarios:registro_conductor' %}" class="btn btn-traiber">Registrarme como conductor</a>
+    </div>
+</div>
+{% endblock %}

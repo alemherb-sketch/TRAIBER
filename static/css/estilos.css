@@ -1,0 +1,116 @@
+:root {
+    --traiber-naranja: #ff7a00;
+    --traiber-naranja-oscuro: #e56a00;
+    --traiber-negro: #16171b;
+    --traiber-gris: #6b7280;
+    --traiber-gris-claro: #f4f5f7;
+    --traiber-verde: #16a34a;
+    --traiber-rojo: #dc2626;
+}
+
+body {
+    font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+    background-color: var(--traiber-gris-claro);
+    color: var(--traiber-negro);
+}
+
+.navbar-traiber {
+    background-color: var(--traiber-negro);
+}
+
+.navbar-traiber .navbar-brand {
+    font-weight: 800;
+    letter-spacing: 1px;
+    color: var(--traiber-naranja) !important;
+    font-size: 1.5rem;
+}
+
+.navbar-traiber .nav-link {
+    color: #e5e7eb !important;
+}
+
+.navbar-traiber .nav-link:hover {
+    color: var(--traiber-naranja) !important;
+}
+
+.btn-traiber {
+    background-color: var(--traiber-naranja);
+    border-color: var(--traiber-naranja);
+    color: #fff;
+    font-weight: 600;
+}
+
+.btn-traiber:hover {
+    background-color: var(--traiber-naranja-oscuro);
+    border-color: var(--traiber-naranja-oscuro);
+    color: #fff;
+}
+
+.btn-outline-traiber {
+    border-color: var(--traiber-naranja);
+    color: var(--traiber-naranja);
+    font-weight: 600;
+}
+
+.btn-outline-traiber:hover {
+    background-color: var(--traiber-naranja);
+    color: #fff;
+}
+
+.hero-traiber {
+    background: linear-gradient(135deg, var(--traiber-negro) 0%, #2b2d33 100%);
+    color: #fff;
+    padding: 5rem 0;
+}
+
+.card-traiber {
+    border: none;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.08);
+}
+
+.badge-estado {
+    font-size: 0.85rem;
+    padding: 0.4em 0.8em;
+    border-radius: 999px;
+}
+
+#mapa-traiber, #mapa-tracking, #mapa-publico {
+    height: 420px;
+    border-radius: 16px;
+    z-index: 0;
+}
+
+.leaflet-container {
+    border-radius: 16px;
+}
+
+.boton-emergencia {
+    background-color: var(--traiber-rojo);
+    color: #fff;
+    border: none;
+    font-weight: 700;
+    border-radius: 999px;
+    padding: 0.6rem 1.4rem;
+}
+
+.boton-emergencia:hover {
+    background-color: #b91c1c;
+    color: #fff;
+}
+
+.tarjeta-solicitud {
+    border-left: 5px solid var(--traiber-naranja);
+}
+
+.estrella {
+    color: #f59e0b;
+    cursor: pointer;
+    font-size: 1.6rem;
+}
+
+.footer-traiber {
+    background-color: var(--traiber-negro);
+    color: #9ca3af;
+    padding: 2rem 0;
+}

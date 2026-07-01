@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block titulo %}Seguimiento de viaje - TRAIBER{% endblock %}
+{% block contenido %}
+<div class="row justify-content-center">
+    <div class="col-lg-8">
+        <div class="card card-traiber p-4 mb-3">
+            <h1 class="h5 fw-bold mb-2">Seguimiento en vivo del viaje de {{ viaje.pasajero.get_full_name|default:viaje.pasajero.username }}</h1>
+            <p class="mb-1"><strong>Desde:</strong> {{ viaje.origen_direccion }}</p>
+            <p class="mb-1"><strong>Hasta:</strong> {{ viaje.destino_direccion }}</p>
+            <p class="mb-0"><strong>Estado:</strong> <span id="txt-estado">{{ viaje.get_estado_display }}</span></p>
+        </div>
+        <div id="mapa-publico"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{% load l10n %}{% localize off %}
+<script>
+    const mapa = L.map('mapa-publico').setView([{{ viaje.origen_lat }}, {{ viaje.origen_lng }}], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', { attribution: '&copy; OpenStreetMap' }).addTo(mapa);
+
+    const iconoOrigen = L.divIcon({ html: '<div style="font-size:1.6rem;">🟢</div>', className: '' });
+    const iconoDestino = L.divIcon({ html: '<div style="font-size:1.6rem;">🔴</div>', className: '' });
+    const iconoConductor = L.divIcon({ html: '<div style="font-size:1.8rem;">🚗</div>', className: '' });
+
+    L.marker([{{ viaje.origen_lat }}, {{ viaje.origen_lng }}], { icon: iconoOrigen }).addTo(mapa);
+    L.marker([{{ viaje.destino_lat }}, {{ viaje.destino_lng }}], { icon: iconoDestino }).addTo(mapa);
+    let marcadorConductor = null;
+
+    const protocolo = window.location.protocol === 'https:' ? 'wss' : 'ws';
+    const socket = new WebSocket(`${protocolo}://${window.location.host}/ws/seguimiento/{{ token }}/`);
+    socket.onmessage = (evento) => {
+        const datos = JSON.parse(evento.data);
+        if (datos.tipo === 'ubicacion') {
+            const lat = parseFloat(datos.lat);
+            const lng = parseFloat(datos.lng);
+            if (marcadorConductor) mapa.removeLayer(marcadorConductor);
+            marcadorConductor = L.marker([lat, lng], { icon: iconoConductor }).addTo(mapa);
+        } else if (datos.tipo === 'estado') {
+            document.getElementById('txt-estado').textContent = datos.mensaje || datos.estado;
+        } else if (datos.tipo === 'emergencia') {
+            alert('¡Se activó el botón de emergencia en este viaje!');
+        }
+    };
+</script>
+{% endlocalize %}
+{% endblock %}
