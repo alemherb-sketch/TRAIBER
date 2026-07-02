@@ -10,12 +10,14 @@ class SolicitarViajeForm(forms.ModelForm):
             'origen_direccion', 'origen_lat', 'origen_lng',
             'destino_direccion', 'destino_lat', 'destino_lng',
             'distancia_km', 'tiempo_estimado_min',
-            'modo_tarifa', 'tarifa_propuesta_pasajero', 'metodo_pago',
+            'modo_tarifa', 'tarifa_propuesta_pasajero', 'metodo_pago', 'propina',
         )
         widgets = {
             'origen_lat': forms.HiddenInput(), 'origen_lng': forms.HiddenInput(),
             'destino_lat': forms.HiddenInput(), 'destino_lng': forms.HiddenInput(),
             'distancia_km': forms.HiddenInput(), 'tiempo_estimado_min': forms.HiddenInput(),
+            'modo_tarifa': forms.HiddenInput(), 'metodo_pago': forms.HiddenInput(),
+            'propina': forms.HiddenInput(), 'tarifa_propuesta_pasajero': forms.HiddenInput(),
         }
 
 

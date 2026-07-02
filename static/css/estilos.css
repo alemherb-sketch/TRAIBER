@@ -75,7 +75,7 @@ body {
     border-radius: 999px;
 }
 
-#mapa-traiber, #mapa-tracking, #mapa-publico {
+#mapa-tracking, #mapa-publico {
     height: 420px;
     border-radius: 16px;
     z-index: 0;
@@ -113,4 +113,237 @@ body {
     background-color: var(--traiber-negro);
     color: #9ca3af;
     padding: 2rem 0;
+}
+
+/* ---- Pantalla de pedir viaje, estilo Uber ---- */
+
+.uber-pantalla {
+    margin: -1.5rem -0.75rem 0;
+}
+
+.uber-mapa-wrap {
+    position: relative;
+}
+
+#mapa-traiber {
+    height: 46vh;
+    min-height: 320px;
+    border-radius: 0;
+    z-index: 0;
+}
+
+.uber-barra-superior {
+    position: absolute;
+    top: 1rem;
+    left: 1rem;
+    right: 1rem;
+    z-index: 500;
+    background: rgba(22, 23, 27, 0.92);
+    border-radius: 16px;
+    padding: 0.9rem 1rem;
+    color: #fff;
+    backdrop-filter: blur(4px);
+}
+
+.uber-direccion-fila {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.35rem 0;
+}
+
+.uber-direccion-fila + .uber-direccion-fila {
+    border-top: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.uber-punto {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex: 0 0 auto;
+}
+
+.uber-punto-origen { background-color: #22c55e; }
+.uber-punto-destino { background-color: var(--traiber-naranja); }
+
+.uber-direccion-fila input {
+    background: transparent;
+    border: none;
+    color: #fff;
+    width: 100%;
+    font-size: 0.95rem;
+}
+
+.uber-direccion-fila input:focus {
+    outline: none;
+}
+
+.uber-direccion-fila input::placeholder {
+    color: rgba(255, 255, 255, 0.55);
+}
+
+.uber-sugerencias {
+    position: absolute;
+    left: 1rem;
+    right: 1rem;
+    z-index: 600;
+    max-height: 220px;
+    overflow-y: auto;
+    border-radius: 12px;
+}
+
+.uber-btn-ubicacion {
+    position: absolute;
+    right: 1rem;
+    bottom: 1rem;
+    z-index: 500;
+    width: 46px;
+    height: 46px;
+    border-radius: 50%;
+    background: var(--traiber-negro);
+    color: #fff;
+    border: none;
+    font-size: 1.2rem;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+}
+
+.uber-hoja {
+    background: var(--traiber-negro);
+    color: #fff;
+    border-radius: 24px 24px 0 0;
+    margin-top: -20px;
+    position: relative;
+    z-index: 10;
+    padding: 1.25rem 1.25rem 2rem;
+}
+
+.uber-manija {
+    width: 42px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.3);
+    border-radius: 999px;
+    margin: 0 auto 1rem;
+}
+
+.uber-titulo {
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.9rem;
+}
+
+.uber-servicios {
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+    margin-bottom: 1rem;
+}
+
+.uber-servicio {
+    display: flex;
+    align-items: center;
+    gap: 0.9rem;
+    width: 100%;
+    background: #1f2027;
+    border: 1px solid transparent;
+    border-radius: 14px;
+    padding: 0.75rem 1rem;
+    color: #fff;
+    text-align: left;
+}
+
+.uber-servicio.seleccionado {
+    border-color: var(--traiber-naranja);
+    background: #2a2410;
+}
+
+.uber-servicio-icono {
+    font-size: 1.9rem;
+    flex: 0 0 auto;
+}
+
+.uber-servicio-info {
+    flex: 1 1 auto;
+    display: flex;
+    flex-direction: column;
+}
+
+.uber-servicio-eta {
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 0.85rem;
+}
+
+.uber-servicio-precio {
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.uber-oferta-input {
+    margin-bottom: 1rem;
+}
+
+.uber-fila-pago {
+    margin-bottom: 1rem;
+}
+
+.uber-fila {
+    display: flex;
+    align-items: center;
+    gap: 0.7rem;
+    width: 100%;
+    background: #1f2027;
+    border: none;
+    border-radius: 14px;
+    padding: 0.75rem 1rem;
+    color: #fff;
+}
+
+.uber-metodo-label {
+    flex: 1 1 auto;
+    text-align: left;
+    color: var(--traiber-naranja);
+    font-weight: 600;
+}
+
+.uber-fila-chevron {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 1.2rem;
+}
+
+.uber-propinas {
+    display: flex;
+    gap: 0.5rem;
+    margin-bottom: 1.25rem;
+    flex-wrap: wrap;
+}
+
+.uber-propina-btn {
+    flex: 1 1 auto;
+    background: #1f2027;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    color: #fff;
+    border-radius: 10px;
+    padding: 0.6rem 0.5rem;
+    font-size: 0.9rem;
+}
+
+.uber-propina-btn.seleccionado {
+    border-color: var(--traiber-naranja);
+    background: #2a2410;
+    color: var(--traiber-naranja);
+}
+
+.uber-confirmar {
+    width: 100%;
+    background: var(--traiber-naranja);
+    color: #16171b;
+    font-weight: 700;
+    font-size: 1.05rem;
+    border: none;
+    border-radius: 999px;
+    padding: 0.9rem;
+}
+
+.uber-confirmar:disabled {
+    background: #4b4c52;
+    color: rgba(255, 255, 255, 0.6);
 }

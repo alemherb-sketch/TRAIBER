@@ -49,6 +49,7 @@ class Viaje(models.Model):
         TARJETA = 'tarjeta', 'Tarjeta de crédito/débito'
 
     metodo_pago = models.CharField(max_length=10, choices=MetodoPago.choices, default=MetodoPago.EFECTIVO)
+    propina = models.DecimalField(max_digits=6, decimal_places=2, default=0)
 
     estado = models.CharField(max_length=20, choices=Estado.choices, default=Estado.BUSCANDO)
 
@@ -90,7 +91,7 @@ class Viaje(models.Model):
     def monto_neto_conductor(self):
         if not self.tarifa_final:
             return 0
-        return round(float(self.tarifa_final) - self.monto_comision_plataforma, 2)
+        return round(float(self.tarifa_final) - self.monto_comision_plataforma + float(self.propina), 2)
 
 
 class OfertaViaje(models.Model):

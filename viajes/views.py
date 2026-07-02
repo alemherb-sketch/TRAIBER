@@ -59,6 +59,7 @@ def panel_pasajero(request):
         'form': form,
         'tarifa_base': settings.TARIFA_BASE,
         'tarifa_por_km': settings.TARIFA_POR_KM,
+        'tarifa_por_minuto': settings.TARIFA_POR_MINUTO,
         'tarifa_minima': settings.TARIFA_MINIMA,
     })
 
@@ -287,7 +288,7 @@ def finalizar_viaje(request, viaje_id):
     viaje.save(update_fields=['estado', 'hora_fin', 'tarifa_final'])
 
     pago, _ = Pago.objects.get_or_create(
-        viaje=viaje, defaults={'metodo': viaje.metodo_pago, 'monto': viaje.tarifa_final}
+        viaje=viaje, defaults={'metodo': viaje.metodo_pago, 'monto': viaje.tarifa_final + viaje.propina}
     )
     pago.marcar_pagado()
 
