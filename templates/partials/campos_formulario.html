@@ -10,6 +10,12 @@
                 {{ field|add_class:"form-check-input" }}
             {% elif tipo == 'select' or tipo == 'selectmultiple' %}
                 {{ field|add_class:"form-select" }}
+            {% elif tipo == 'passwordinput' %}
+                <div class="input-group">
+                    {{ field|add_class:"form-control" }}
+                    <button type="button" class="btn btn-outline-secondary toggle-password"
+                            data-target="{{ field.id_for_label }}" aria-label="Mostrar contraseña">👁️</button>
+                </div>
             {% else %}
                 {{ field|add_class:"form-control" }}
             {% endif %}

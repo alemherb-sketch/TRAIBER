@@ -75,6 +75,18 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script>
+        document.addEventListener('click', function (e) {
+            const boton = e.target.closest('.toggle-password');
+            if (!boton) return;
+            const input = document.getElementById(boton.dataset.target);
+            if (!input) return;
+            const mostrando = input.type === 'text';
+            input.type = mostrando ? 'password' : 'text';
+            boton.textContent = mostrando ? '👁️' : '🙈';
+            boton.setAttribute('aria-label', mostrando ? 'Mostrar contraseña' : 'Ocultar contraseña');
+        });
+    </script>
     {% block extra_js %}{% endblock %}
 </body>
 </html>
